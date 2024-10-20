@@ -47,12 +47,11 @@ resource "aws_instance" "jenkins_master" {
               # Ensure Jenkins is running (should already be installed)
               systemctl start jenkins
               systemctl enable jenkins
-
-              # Generate SSH key pair for Jenkins master to connect to agents
-              sudo -u jenkins ssh-keygen -t rsa -N "" -f /var/lib/jenkins/.ssh/id_rsa
-
-              # Set correct permissions for SSH keys
-              sudo chown jenkins:jenkins /var/lib/jenkins/.ssh/id_rsa*
+              mkdir /var/lib/jenkins/.ssh
+              chown jenkins:jenkin
+              echo "${aws_instance.jenkins_agent.public_ip}" >> /var/lib/jenkins/.ssh/know_hosts
+              chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+              chmod 600 /home/ubuntu/.ssh/authorized_keys
               EOF
 
   tags = {
