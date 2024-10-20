@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  mongo:
+    build:
+      context: ./Database # My Database startfile is in the 'Database' directory
+      dockerfile: Dockerfile # The Dockerfile for the database mongodb
+    # volumes:
+    #   - ./pizzas.json:/docker-entrypoint-initdb.d/pizzas.json:ro
+    networks:
+      - app-network # Connects to the custom network
+
+  backend:
+    build:
+      context: ./Back-end # My backend code is in the 'Back-end' directory
+      dockerfile: Dockerfile # The Dockerfile for the backend Node.js application
+    container_name: backend
+    ports:
+      - "3000:3000" # Maps backend port 3000 to host
+    depends_on:
+      - mongo # Wait for MongoDB to be ready
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/menu # Connection string for MongoDB using service name
+    networks:
+      - app-network # Connects to the custom network
+
+  frontend:
+    build:
+      context: ./Front-end # My frontend code is in the 'Front-end' directory
+      dockerfile: Dockerfile # The Dockerfile for the frontend React app
+    container_name: frontend
+    ports:
+      - "3001:80" # Exposes frontend on port 3001
+    depends_on:
+      - backend # Wait for the backend to be ready
+    environment:
+      - REACT_APP_API_URL=http://backend:3000/ # API URL for the backend using service name
+    networks:
+      - app-network # Connects to the custom network
+
+networks:
+  app-network:
+    driver: bridge # Default network driver in Docker
