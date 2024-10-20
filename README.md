@@ -22,3 +22,34 @@ In the Terraform code, a security group (`jenkins_sg`) is created allowing:
 - AMI used: `ami-0866a3c8686eaeeba` (Ubuntu 24.04).
 - The `jenkins-agent-userdata.sh` script installs the required software such as Docker, and sets up SSH keys for communication with the Jenkins Master.
 - The Agent instance executes Jenkins build steps and runs Docker containers as needed.
+---
+### Pipeline Configuration
+
+The Jenkins pipeline consists of the following stages:
+
+#### 1. **Checkout Code from GitHub:**
+   - The pipeline clones the repository from a **private GitHub repository** using a token for authentication.
+   - The repository URL is stored in the environment variable `GIT_REPO`, and the main branch is checked out.
+
+#### 2. **Build Docker Images:**
+   - The pipeline builds Docker images for the three components:
+     - **Frontend:** `hazem196/pizzafront:latest`
+     - **Backend:** `hazem196/pizzaback:latest`
+     - **Database:** `hazem196/pizzadb:latest`
+   - The Dockerfiles for each component are located in their respective directories:
+     - `Front-end/`
+     - `Back-end/`
+     - `Database/`
+
+#### 3. **Push Images to Docker Hub:**
+   - The Docker images are pushed to Docker Hub using the `dockerhub-token` credentials.
+   - If an image fails to push, the pipeline logs the error.
+
+#### 4. **Run Application:**
+   - Docker containers for the database, backend, and frontend services are started.
+   - The following ports are exposed:
+     - **Database:** 27017
+     - **Backend:** 3000
+     - **Frontend:** 80 (mapped to 3001)
+
+> **Note:** We are using a private GitHub repository in this pipeline, which requires proper authentication to access the codebase also we add  code here.
